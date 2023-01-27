@@ -13,6 +13,10 @@ class MarvelSevice {
     getAllCharacters = () => {
         return this.getResourse("https://gateway.marvel.com:443/v1/public/characters?limit=9&offset=210&apikey=ab5709f6705f5f9a400e1448fb37647c")
     }
+
+    getCharacter = (id) => {
+        return this.getResourse(`https://gateway.marvel.com:443/v1/public/characters/${id}?apikey=ab5709f6705f5f9a400e1448fb37647c`)
+    }
     
 }
 
