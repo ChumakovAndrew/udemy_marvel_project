@@ -1,23 +1,38 @@
 
-class MarvelSevice {
-    getResourse = async (url) => {
+class MarvelService {
+
+    _apiBase = "https://gateway.marvel.com:443/v1/public/"
+    _apiKey = "apikey=ab5709f6705f5f9a400e1448fb37647c"
+
+
+    getResource = async (url) => {
         let res = await fetch(url);
-
-        if(!res.ok){
-            throw new Error (`Could not fetch ${url}, status: ${res.status}`)
+    
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
         }
-
+    
         return await res.json();
     }
 
     getAllCharacters = () => {
-        return this.getResourse("https://gateway.marvel.com:443/v1/public/characters?limit=9&offset=210&apikey=ab5709f6705f5f9a400e1448fb37647c")
+        return this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`);
     }
 
     getCharacter = (id) => {
-        return this.getResourse(`https://gateway.marvel.com:443/v1/public/characters/${id}?apikey=ab5709f6705f5f9a400e1448fb37647c`)
+        return this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`);
     }
-    
+
+    _transformCharacter = (char) => {
+        return {
+            name: char.name,
+            description: char.description ? `${char.description.slice(0, 210)}...` : 'There is no description for this character',
+            thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
+            homepage: char.urls[0].url,
+            wiki: char.urls[1].url
+        }
+    }
 }
 
-export default MarvelSevice
+
+export default MarvelService;
