@@ -5,17 +5,12 @@ import MarvelService from '../../services/MarvelService';
 import './charList.scss';
 
 
-
-
 class CharList extends Component{
-    constructor(props){
-        super(props)
-        this.state = {
+        state = {
             chars:[]
         }
-    }
     
-    marvelService = new MarvelService
+    marvelService = new MarvelService()
 
    componentDidMount(){
     this.updateChars()
@@ -27,18 +22,15 @@ class CharList extends Component{
 
     updateChars = () => {
         const {getAllCharacters, _transformCharacter} = this.marvelService
-        let tempChars = []
+
         getAllCharacters()
             .then(res => {
-                res.data.results.forEach(item => {
-                    tempChars.push({..._transformCharacter(item)})   
-                })
-            this.onUpdateChars(tempChars)
+                this.onUpdateChars(res.data.results.map(item => ({..._transformCharacter(item)})))  
             })
+            
     }
     
     renderItems = (chars) => {
-        
         const items =  chars.map((item) => {
             let imgStyle = {'objectFit' : 'cover'};
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
