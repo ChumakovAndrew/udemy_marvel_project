@@ -18,11 +18,15 @@ class RandomChar extends Component {
             error: false
         }
 
-        this.updateChar()
     }
     
     marvelService = new MarvelService();
 
+    componentDidMount(){
+        this.updateChar()
+    }
+
+ 
     onCharLoaded = (char) => {
         this.setState({char, loading: false})
     }
@@ -46,6 +50,14 @@ class RandomChar extends Component {
             .catch(this.onError)
     }
 
+    onUpdateChar = () => {
+        this.setState({
+            loading: true,
+            error: false
+        })
+        this.updateChar()
+    }
+
 
     render() {
         const { loading, error} = this.state
@@ -53,8 +65,13 @@ class RandomChar extends Component {
         
         let descr = (description && description.length >= 210) ? description.slice(0, 210) + "..." : description
 
+        let imgStyle = null
+        if(thumbnail && thumbnail.slice(-23) === 'image_not_available.jpg'){
+           imgStyle = {objectFit: "contain"}
+        }
+
         const blockRandomChar = <div className="randomchar__block">
-                                    <img src={thumbnail} alt="Random character" className="randomchar__img"/>
+                                    <img src={thumbnail} alt="Random character" className="randomchar__img" style={imgStyle} />
                                     <div className="randomchar__info">
                                         <p className="randomchar__name">{name}</p>
                                         <p className="randomchar__descr">
@@ -90,7 +107,8 @@ class RandomChar extends Component {
                         Or choose another one
                     </p>
                     <button className="button button__main">
-                        <div className="inner">try it</div>
+                        <div className="inner"
+                            onClick={this.onUpdateChar}>try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
                 </div>
