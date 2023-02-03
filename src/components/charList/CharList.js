@@ -1,23 +1,23 @@
 import { Component } from 'react';
 
 import MarvelService from '../../services/MarvelService';
+import Spiner from '../spinner/Spinner';
+import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './charList.scss';
 
 
 class CharList extends Component{
         state = {
-            chars:[]
+            chars:[],
+            error: false,
+            loading: true,
         }
     
     marvelService = new MarvelService()
 
-   componentDidMount(){
-    this.updateChars()
-   }
-
-    onUpdateChars = (chars) => {
-        this.setState({chars})
+    componentDidMount(){
+        this.updateChars();
     }
 
     updateChars = () => {
@@ -25,9 +25,20 @@ class CharList extends Component{
 
         getAllCharacters()
             .then(res => {
-                this.onUpdateChars(res.data.results.map(item => ({..._transformCharacter(item)})))  
+                this.setState({
+                    chars: res.data.results.map(item => ({..._transformCharacter(item)})),
+                    loading: false
+                })  
             })
+            .catch(this.onError)
             
+    }
+
+    onError = () => {
+        this.setState({
+            loading: false,
+            error: true
+        })
     }
     
     renderItems = (chars) => {
@@ -36,11 +47,12 @@ class CharList extends Component{
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = {'objectFit' : 'unset'};
             }
-            console.log("я работаю")
+            
             return (
                 <li 
                     className="char__item"
-                    key={item.id}>
+                    key={item.id}
+                    onClick={() => {this.props.onCharSelected(item.id)}}>
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                         <div className="char__name">{item.name}</div>
                 </li>
@@ -56,13 +68,18 @@ class CharList extends Component{
     
 
     render(){
-        const {chars} = this.state
-        const item = this.renderItems(chars);
-        
+        const {chars, loading, error} = this.state
+        const item = this.renderItems(chars, );
+
+        const spiner = loading ? <Spiner/> : null
+        const errorMassage = error ? <ErrorMessage/> : null
+        const cardsChar = !(loading || error) ? item : null
         
         return (
             <div className="char__list">
-                {item}
+                {spiner}
+                {errorMassage}
+                {cardsChar}
                 <button className="button button__main button__long">
                     <div className="inner">load more</div>
                 </button>
