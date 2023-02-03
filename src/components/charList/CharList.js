@@ -12,6 +12,12 @@ class CharList extends Component{
             chars:[],
             error: false,
             loading: true,
+            gettingParametrs: {
+                limit: '9',
+                offset: '200'
+            },
+            moreCharsLoading: false
+            
         }
     
     marvelService = new MarvelService()
@@ -22,12 +28,18 @@ class CharList extends Component{
 
     updateChars = () => {
         const {getAllCharacters, _transformCharacter} = this.marvelService
+        const {gettingParametrs: {offset}, chars} = this.state
 
-        getAllCharacters()
+        getAllCharacters(offset)
             .then(res => {
+                const newChars = res.data.results.map(item => ({..._transformCharacter(item)}))
+                const newOffset = +offset + 9
                 this.setState({
-                    chars: res.data.results.map(item => ({..._transformCharacter(item)})),
-                    loading: false
+                    chars: [...chars, ...newChars],
+                    loading: false,
+                    gettingParametrs: {offset: newOffset},
+                    moreCharsLoading: false,
+                    
                 })  
             })
             .catch(this.onError)
@@ -39,6 +51,13 @@ class CharList extends Component{
             loading: false,
             error: true
         })
+    }
+
+    onLoadMoreChars = () => {
+        this.setState({
+            moreCharsLoading: true,
+        })
+        this.updateChars()
     }
     
     renderItems = (chars) => {
@@ -68,7 +87,7 @@ class CharList extends Component{
     
 
     render(){
-        const {chars, loading, error} = this.state
+        const {chars, loading, error, moreCharsLoading} = this.state
         const item = this.renderItems(chars, );
 
         const spiner = loading ? <Spiner/> : null
@@ -80,7 +99,10 @@ class CharList extends Component{
                 {spiner}
                 {errorMassage}
                 {cardsChar}
-                <button className="button button__main button__long">
+                <button 
+                    className="button button__main button__long" 
+                    onClick={this.onLoadMoreChars}
+                    disabled={moreCharsLoading}>
                     <div className="inner">load more</div>
                 </button>
             </div>
