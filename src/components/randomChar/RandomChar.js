@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 
 import MarvelService from '../../services/MarvelService';
 import Spiner from '../spinner/Spinner';
@@ -9,63 +9,53 @@ import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 
-class RandomChar extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-            char: {},
-            loading: true,
-            error: false
-        }
+const RandomChar = (props) => {
 
+    const [char, setChar] = useState({})
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(false)
+
+    const marvelService = new MarvelService();
+
+    useEffect(() => {
+        updateChar()
+    },[])
+
+
+    const onError = () => {
+        setLoading(false)
+        setError(true)
     }
     
-    marvelService = new MarvelService();
-
-    componentDidMount(){
-        this.updateChar()
-    }
-
- 
-    onCharLoaded = (char) => {
-        this.setState({char, loading: false})
-    }
-
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
-    }
     
-    updateChar = () => {
-        const {getCharacter, _transformCharacter} = this.marvelService
+    const updateChar = () => {
+        const {getCharacter, _transformCharacter} = marvelService
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
         
         getCharacter(id)
             .then(res => {
                 const result = _transformCharacter(res.data.results[0])
-                this.onCharLoaded(result)
+                setChar(result)
+                setLoading(false)
             })
-            .catch(this.onError)
-    }
-
-    onUpdateChar = () => {
-        this.setState({
-            loading: true,
-            error: false
-        })
-        this.updateChar()
+            .catch(onError)
     }
 
 
-    render() {
-        const { loading, error} = this.state
-        const { char: {name, description, thumbnail, homepage, wiki } } = this.state
+    const onUpdateChar = () => {
+        setLoading(true)
+        setError(false)
+
+        updateChar()
+    }
+
+
+        const {name, description, thumbnail, homepage, wiki } = char
         
         let descr = (description && description.length >= 210) ? description.slice(0, 210) + "..." : description
 
         let imgStyle = null
+
         if(thumbnail && thumbnail.slice(-23) === 'image_not_available.jpg'){
            imgStyle = {objectFit: "contain"}
         }
@@ -108,13 +98,12 @@ class RandomChar extends Component {
                     </p>
                     <button className="button button__main">
                         <div className="inner"
-                            onClick={this.onUpdateChar}>try it</div>
+                            onClick={onUpdateChar}>try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
                 </div>
             </div>
         )
-    }
 }
 
 export default RandomChar;
