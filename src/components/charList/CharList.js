@@ -1,6 +1,6 @@
 import {useEffect, useState } from 'react';
 
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spiner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
@@ -10,12 +10,11 @@ import './charList.scss';
 const CharList = (props) => {
 
     const [ chars , setChars ] = useState( [] )
-    const [ error , setError ] = useState( false )
-    const [ loading , setLoading ] = useState( true )
     const [ offset, setOffset ] = useState( '200' )
     const [ moreCharsLoading, setMoreCharsLoading ] = useState( false )
     
-    const marvelService = new MarvelService()
+    
+    const {loading, error, getAllCharacters, _transformCharacter} = useMarvelService()
 
     useEffect(() => {
         updateChars()
@@ -24,31 +23,19 @@ const CharList = (props) => {
 
 
     const updateChars = () => {
-        const {getAllCharacters, _transformCharacter} = marvelService
-
+        
         getAllCharacters(offset)
             .then(res => {
                 const newChars = res.data.results.map(item => ({..._transformCharacter(item)}))
                 const newOffset = +offset + 9
-                
                     setChars(chars => [...chars, ...newChars]) 
-                    setLoading(false)
-                    setOffset(offset => newOffset) 
-                    setMoreCharsLoading(false) 
-                    
-            })
-            .catch(onError)
-            
-    }
-
-    const onError = () => {
-        setLoading(false)
-        setError(true)  
+                    setOffset(newOffset) 
+                    setMoreCharsLoading(false)        
+            })    
     }
 
     const onLoadMoreChars = () => {
         setMoreCharsLoading(true) 
-       
         updateChars()
     }
     
@@ -67,7 +54,7 @@ const CharList = (props) => {
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                         <div className="char__name">{item.name}</div>
                 </li>
-            )
+            ) 
         });
 
         return(
@@ -78,24 +65,24 @@ const CharList = (props) => {
     }
     
 
-    const item = renderItems(chars);
+    const items = renderItems(chars);
 
     const spiner = loading ? <Spiner/> : null
     const errorMassage = error ? <ErrorMessage/> : null
-    const cardsChar = !(loading || error) ? item : null
     
     return (
         <div className="char__list">
-            {spiner}
             {errorMassage}
-            {cardsChar}
+            {items} 
+            {spiner} 
             <button 
                 className="button button__main button__long" 
                 onClick={onLoadMoreChars}
                 disabled={moreCharsLoading}>
                 <div className="inner">load more</div>
-            </button>
+        </button>
         </div>
+     
     )
 }
 

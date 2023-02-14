@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import AppHeader from "../appHeader/AppHeader";
 import RandomChar from "../randomChar/RandomChar";
@@ -11,9 +11,10 @@ const App = () => {
     
     const [selectedChar, setChar] = useState(null)
 
-    const onCharSelected = (id) => {
+    const onCharSelected = useCallback((id) => {
         setChar(id)
-    }
+    }, [])
+
 
 
     return (
