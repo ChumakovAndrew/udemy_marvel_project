@@ -16,6 +16,10 @@ const useMarvelService = () => {
         return request(`${_apiBase}characters/${id}?${_apiKey}`);
     }
 
+    const getAllComics = (offset = 0, limit = 8) => {
+        return request(`${_apiBase}comics?limit=${limit}&offset=${offset}&${_apiKey}`)
+    }
+
     const _transformCharacter = (char) => {
         return {
             id: char.id,
@@ -28,7 +32,17 @@ const useMarvelService = () => {
         }
     }
 
-    return {loading, error, clearError, getAllCharacters, getCharacter, _transformCharacter}
+    const transformComics = (comics) => {
+        return {
+            id: comics.id,
+            title: comics.title,
+            description: comics.description ? comics.description : 'There is no description for this character',
+            thumbnail: comics.thumbnail.path + '.' + comics.thumbnail.extension,
+            prices: comics.prices[0].price
+        }
+    }
+
+    return {loading, error, clearError, getAllCharacters, getCharacter, _transformCharacter, getAllComics, transformComics}
 }
 
 
